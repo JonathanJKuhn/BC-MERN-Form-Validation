@@ -13,7 +13,6 @@ const initialState = {
         value: '',
         error: null
     },
-    isValid: false,
     hasBeenSubmitted: false
 }
 
@@ -67,11 +66,6 @@ const reducer = (state, action) => {
                     error: action.payload
                 }
             }
-        case "SET_ISVALID_BOOLEAN":
-            return {
-                ...state,
-                isValid: action.payload
-            }
         case "SET_SUBMITTED_BOOLEAN":
             return {
                 ...state,
@@ -84,19 +78,9 @@ const reducer = (state, action) => {
 
 const Form = () => {
     const [state, dispatch] = useReducer(reducer, initialState)
-
-    const validFormCheck = (state) => {
-        let check = true
-        Object.values(state).map((key) => 
-            key.value === "" || (key.error !== "" && typeof key.error !== 'undefined')
-            ? check = false
-            : null
-        )
-        dispatch({
-            type: "SET_ISVALID_BOOLEAN",
-            payload: check
-        })
-    }
+    const hasBlanks = !state.firstName.value || !state.lastName.value || !state.email.value
+    const hasErrors = state.firstName.error || state.lastName.error || state.email.error
+    const isValid = !hasBlanks && !hasErrors
 
     const handleFirstNameChange = (e) => {
         if (e.target.value.length < 2) {
@@ -114,7 +98,6 @@ const Form = () => {
             type: "SET_FIRSTNAME_VALUE",
             payload: e.target.value
         })
-        setTimeout(validFormCheck(state), 1000)
     }
 
     const handleLastNameChange = (e) => {
@@ -133,7 +116,6 @@ const Form = () => {
                 payload: ""
             })
         }
-        validFormCheck(state)
     }
 
     const handleEmailChange = (e) => {
@@ -152,7 +134,6 @@ const Form = () => {
             type: "SET_EMAIL_VALUE",
             payload: e.target.value
         })
-        validFormCheck(state)
     }
 
     const handleSubmit = (e) => {
@@ -205,7 +186,7 @@ const Form = () => {
                         <p className='error'>{state.email.error}</p>
                         )}
                 </div>
-                <input type="submit" value="Submit" disabled={!state.isValid?true:false}/>
+                <input type="submit" value="Submit" disabled={!isValid}/>
             </form>
         </div>
     )
